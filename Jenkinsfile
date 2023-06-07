@@ -19,6 +19,29 @@ pipeline {
            sh 'mvn verify -DskipUnitTests'
         }
       }
+      stage('Maven Build'){
+        steps{
+           sh 'mvn clean install'
+        }
+      }
+      stage('sonar quality check'){
+
+      agent{
+        docker {
+          image 'maven'
+          args '-u root'
+        }
+      }
+      steps{
+        script{
+          withSonarQubeEnv(credentialsId: 'sonar-token') {
+            sh 'mvn clean package sonar:sonar'
+          }
+        }
+
+      }
+    }
+
       stage('Test') {
         agent {
            docker { image 'node:18.16.0-alpine' }
